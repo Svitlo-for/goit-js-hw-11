@@ -24,3 +24,4 @@ export async function imgParams (value, page) {
         throw error;
     }
 }
+console.dir(imgParams);
