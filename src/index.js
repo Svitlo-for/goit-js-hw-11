@@ -23,56 +23,58 @@ const lightbox = new SimpleLightbox('.gallery a', {
   });
 
   refs.form.addEventListener("submit", onSubmit);
+  refs.loadMore.addEventListener("click", onLoadMore);
 
   function onSubmit(e) {
     e.preventDefault();
     page = 1;
-    clearContent();
     searchQuery = e.currentTarget.elements.searchQuery.value.trim();
     
     if(!searchQuery) {
       return Notiflix.Notify.info('Sorry, there are no images matching your search query. Please try again.');
     };
-    getImage();
+    getImage(searchQuery, page);
   }
 
-  function clearContent() {
-    totalImg = 0;
-    refs.span.textContent = '';
-    refs.gallery.innerHTML = '';
-  }
-
-  async function getImage() {
+  async function getImage(value, page) {
     try {
       const response = await imgParams(value, page);
       refs.form.reset();
 
-      if (response.totalHits) {
+      if (response.totalHits && page === 1) {
         Notiflix.Notify.success(`Hooray! We found ${response.totalHits} images.`);
       };
 
       if (response.totalHits === 0) {
         return Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
       };
-      for (let i = 0; i < response.img.length; i++) {
-        const nextImage = createMarkup([response.img[i]]);
-        refs.gallery.insertAdjacentHTML('beforeend', nextImage);
-        lightbox.refresh();
-      }
-      page +=1;
-      totalImg += response.img.length;
-      if (totalImg >= response.totalHits) {
-        refs.span.textContent = "We're sorry, but you've reached the end of search results."
+
+      refs.loadMore.style.display = 'block';
+
+      response.hits.map((hit) => {
+        return createMarkup(hit);
+      })
+
+      lightbox.refresh();
+
+      if (response.hits.length < 40) {
+        Notiflix.Notify.failure("We're sorry, but you've reached the end of search results.");
+        refs.loadMore.style.display = 'none'
       }
     } catch (error) {
       Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
     }
   }
 
-  window.addEventListener('scroll', () => {
-    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
-      getImage();
-    };
-  });
+  function onLoadMore() {
+    page += 1;
+    getImage(searchQuery, page);
+  }
+
+  // window.addEventListener('scroll', () => {
+  //   if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
+  //     getImage(searchQuery, page);
+  //   };
+  // });
 
 
