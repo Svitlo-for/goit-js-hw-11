@@ -8,9 +8,8 @@ export function createMarkup(img) {
         views,
         comments,
         downloads,
-    }) => {
-        return `
-      <div class="photo-card">
+    }) => `
+    <div class="photo-card">
         <a href="${largeImageURL}">
           <img src="${webformatURL}" alt="${tags}" loading="lazy" />
         </a>  
@@ -32,6 +31,6 @@ export function createMarkup(img) {
             ${downloads}
           </p>
         </div>
-      </div>`
-    }).join('')
+    </div>`
+    ).join('');
   }
